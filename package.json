@@ -1,0 +1,23 @@
+{
+  "name": "starter_code",
+  "version": "1.0.0",
+  "description": "Fyyur\r -----",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/winchy82dev/fyyur.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/winchy82dev/fyyur/issues"
+  },
+  "homepage": "https://github.com/winchy82dev/fyyur#readme",
+  "dependencies": {
+    "bootstrap": "^3.4.1"
+  }
+}
