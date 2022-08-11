@@ -9,6 +9,5 @@ DEBUG = True
 # Connect to the database
 
 
-# IMPLEMENT DATABASE URL
-SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://postgres:pop@localhost:5432/fyyur'
-SQLALCHEMY_TRACK_MODIFICATIONS = True
+# TODO IMPLEMENT DATABASE URL
+SQLALCHEMY_DATABASE_URI = '<Put your local database url>'
