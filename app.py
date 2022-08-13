@@ -118,7 +118,7 @@ def index():
 
 @app.route('/venues')
 def venues():
-  # TODO: replace with real venues data.
+  # replace with real venues data.
   #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
   current_time = datetime.now().strftime('%x %X')
   print(current_time)
@@ -272,7 +272,7 @@ def create_venue_form():
 def create_venue_submission():
   error=False
   try:
-  # TODO: modify data to be the data object returned from db insertion
+  # modify data to be the data object returned from db insertion
     venue = Venue(
       name = request.form.get('name'),
       city = request.form.get('city'),
@@ -289,7 +289,7 @@ def create_venue_submission():
     # prints each element of the instance created
     for attr, value in venue.__dict__.items():
         print(attr + ' : ', value)
-    # TODO: insert form data as a new Venue record in the db, instead
+    # insert form data as a new Venue record in the db, instead
     db.session.add(venue)
     db.session.commit()   
     # on successful db insert, flash success
@@ -299,7 +299,7 @@ def create_venue_submission():
     error=True
     db.session.rollback()
     print(sys.exc_info())
-    # TODO: on unsuccessful db insert, flash an error instead.
+    # on unsuccessful db insert, flash an error instead.
     flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
   finally:
     db.session.close()
@@ -319,7 +319,7 @@ def delete_venue(venue_id):
 #  ----------------------------------------------------------------
 @app.route('/artists')
 def artists():
-  # TODO: replace with real data returned from querying the database
+  # replace with real data returned from querying the database
   data = Artist.query.order_by('id').all()
   mock_data=[{
     "id": 4,
@@ -493,7 +493,7 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   error=False
   try:
-  # TODO: modify data to be the data object returned from db insertion
+  # modify data to be the data object returned from db insertion
     artist = Artist(
       name = request.form.get('name'),
       city = request.form.get('city'),
@@ -510,7 +510,7 @@ def create_artist_submission():
     for attr, value in artist.__dict__.items():
         print(attr + ' : ', value)
 
-  # TODO: insert form data as a new Venue record in the db, instead
+  # insert form data as a new Venue record in the db, instead
     db.session.add(artist)
     db.session.commit()   
     # on successful db insert, flash success
@@ -519,7 +519,7 @@ def create_artist_submission():
     error=True
     db.session.rollback()
     print(sys.exc_info())
-    # TODO: on unsuccessful db insert, flash an error instead.
+    # on unsuccessful db insert, flash an error instead.
     flash('An error occurred. Artist ' + request.form['name']  + ' could not be listed.')
   finally:
     db.session.close()
@@ -583,10 +583,10 @@ def create_shows():
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
-  # TODO: insert form data as a new Show record in the db, instead
+  # insert form data as a new Show record in the db, instead
   error=False
   try:
-  # TODO: modify data to be the data object returned from db insertion
+  # modify data to be the data object returned from db insertion
     show = Show(
       artist_id = request.form.get('artist_id'),
       venue_id = request.form.get('venue_id'),
@@ -596,7 +596,7 @@ def create_show_submission():
     for attr, value in show.__dict__.items():
         print(attr + ' : ', value)
 
-  # TODO: insert form data as a new Venue record in the db, instead
+  # insert form data as a new Venue record in the db, instead
     db.session.add(show)
     db.session.commit()   
     # on successful db insert, flash success
@@ -605,7 +605,7 @@ def create_show_submission():
     error=True
     db.session.rollback()
     print(sys.exc_info())
-    # TODO: on unsuccessful db insert, flash an error instead.
+    # on unsuccessful db insert, flash an error instead.
     flash('An error occurred. Show could not be listed.')
   finally:
     db.session.close()
