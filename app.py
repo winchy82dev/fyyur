@@ -2,6 +2,7 @@
 # Imports
 #----------------------------------------------------------------------------#
 
+from itertools import groupby
 import json
 import sys
 from timeit import repeat
@@ -119,7 +120,25 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
-  data=[{
+  current_time = datetime.now().strftime('%X %x %Z')
+  print(current_time)
+  # upcoming_shows = Venue.shows.filter(Show.start_time > current_time).all()
+  # print(upcoming_shows)
+  venues = Venue.query.order_by(Venue.city, Venue.state).all()
+  data = []
+  for location, venue in groupby(venues, lambda Venue: (Venue.city, Venue.state)):
+        city_n_state = {
+          "city": location[0],
+          "state": location[1],
+          "venues": list(venue)
+          }
+        
+        data.append(city_n_state)
+        # print(city_n_state["venues"])
+        for attr in city_n_state["venues"]:
+          print(attr.name)
+
+  mock_data=[{
     "city": "San Francisco",
     "state": "CA",
     "venues": [{
