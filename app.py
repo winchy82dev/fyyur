@@ -4,6 +4,7 @@
 
 import json
 import sys
+from timeit import repeat
 import dateutil.parser
 import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
@@ -57,17 +58,17 @@ class Artist(db.Model):
     __tablename__ = 'artist'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
+    name = db.Column(db.String, nullable=False)
+    city = db.Column(db.String(120), nullable=False)
+    state = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(120))
     #genres = db.Column(db.String(120))
-    genres = db.Column(db.ARRAY(db.String()))
+    genres = db.Column(db.ARRAY(db.String()), nullable=False)
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
     
     website = db.Column(db.String(500))
-    seeking_venue = db.Column(db.Boolean)
+    seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(500))
     shows = db.relationship('Show', backref='artist', lazy=True) #Show.artist
 
@@ -445,24 +446,9 @@ def create_artist_form():
 def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
-  form = ArtistForm()
-
+  #form = ArtistForm()
   error=False
   try:
-    # get_data = {
-    #   'name' : request.form.get('name'),
-    #   'city' : request.form.get('city'),
-    #   'state' : request.form.get('state'),
-    #   'phone' : request.form.get('phone'),
-    #   'image_link' : request.form.get('image_link'),
-    #   'genres' : request.form.getlist('genres'),
-    #   'facebook_link' : request.form.get('facebook_link'),
-    #   'website_link' : request.form.get('website_link'),
-    #   'seeking_venue' : False if request.form.get('seeking_venue') == None else True,
-    #   'seeking_description' : request.form.get('seeking_description'),
-    #   }
-
-    # print(get_data)
     artist = Artist(
       name = request.form.get('name'),
       city = request.form.get('city'),
@@ -475,28 +461,27 @@ def create_artist_submission():
       seeking_venue = False if request.form.get('seeking_venue') == None else True,
       seeking_description = request.form.get('seeking_description')
     )
-      # name = get_data['name'],
-  
-    print(artist)
-    
-    db.session.add(artist)
-    db.session.commit()
+    # prints each element of the instance created
+    for attr, value in artist.__dict__.items():
+        print(attr + ' : ', value)
 
+    db.session.add(artist)
+    db.session.commit()   
     # on successful db insert, flash success
-    flashType = 'success'
     flash('Artist ' + request.form['name'] + ' was successfully listed!')
   except:
     error=True
     db.session.rollback()
     print(sys.exc_info())
     # TODO: on unsuccessful db insert, flash an error instead.
-    flashType = 'danger'
     flash('An error occurred. Artist ' + request.form['name']  + ' could not be listed.')
   finally:
     db.session.close()
   #if not error:
   # TODO: modify data to be the data object returned from db insertion
-  return render_template('pages/home.html', flashType = flashType)
+  return render_template('pages/home.html')
+    
+
 
 
 #  Shows
