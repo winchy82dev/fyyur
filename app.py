@@ -35,15 +35,15 @@ class Venue(db.Model):
     __tablename__ = 'venue'
  
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
+    name = db.Column(db.String, nullable=False)
+    city = db.Column(db.String(120), nullable=False)
+    state = db.Column(db.String(120), nullable=False)
+    address = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
 
-    genres = db.Column(db.ARRAY(db.String()))
+    genres = db.Column(db.ARRAY(db.String()), nullable=False)
     website = db.Column(db.String(500))
     seeking_description = db.Column(db.String(500))
     seeking_talent = db.Column(db.Boolean, nullable=False, default=False)   
@@ -251,15 +251,41 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-  # TODO: insert form data as a new Venue record in the db, instead
+  error=False
+  try:
   # TODO: modify data to be the data object returned from db insertion
-
-  # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-  return render_template('pages/home.html')
+    venue = Venue(
+      name = request.form.get('name'),
+      city = request.form.get('city'),
+      state = request.form.get('state'),
+      address = request.form.get('address'),
+      phone = request.form.get('phone'),
+      image_link = request.form.get('image_link'),
+      genres = request.form.getlist('genres'),
+      facebook_link = request.form.get('facebook_link'),
+      website = request.form.get('website_link'),
+      eeking_talent = False if request.form.get('eeking_talent') == None else True,
+      seeking_description = request.form.get('seeking_description')
+    )
+    # prints each element of the instance created
+    for attr, value in venue.__dict__.items():
+        print(attr + ' : ', value)
+    # TODO: insert form data as a new Venue record in the db, instead
+    db.session.add(venue)
+    db.session.commit()   
+    # on successful db insert, flash success
+    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+    flash('Venue ' + request.form['name'] + ' was successfully listed!')
+  except:
+    error=True
+    db.session.rollback()
+    print(sys.exc_info())
+    # TODO: on unsuccessful db insert, flash an error instead.
+    flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+  finally:
+    db.session.close()
+  if not error:
+    return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
