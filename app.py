@@ -120,7 +120,7 @@ def index():
 def venues():
   # replace with real venues data.
   #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
-  current_time = datetime.now().strftime('%x %X')
+  current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
   print(current_time)
   # upcoming_shows = Venue.shows.filter(Show.start_time > current_time).all()
   # print(upcoming_shows)
@@ -536,6 +536,7 @@ def create_artist_submission():
 def shows():
   # displays list of shows at /shows
   # TODO: replace with real venues data.
+
   data=[{
     "venue_id": 1,
     "venue_name": "The Musical Hop",
