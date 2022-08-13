@@ -264,7 +264,7 @@ def create_venue_submission():
       genres = request.form.getlist('genres'),
       facebook_link = request.form.get('facebook_link'),
       website = request.form.get('website_link'),
-      eeking_talent = False if request.form.get('eeking_talent') == None else True,
+      seeking_talent = False if request.form.get('seeking_talent') == None else True,
       seeking_description = request.form.get('seeking_description')
     )
     # prints each element of the instance created
