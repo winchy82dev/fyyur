@@ -275,7 +275,8 @@ def delete_venue(venue_id):
 @app.route('/artists')
 def artists():
   # TODO: replace with real data returned from querying the database
-  data=[{
+  data = Artist.query.order_by('id').all()
+  mock_data=[{
     "id": 4,
     "name": "Guns N Petals",
   }, {
@@ -446,7 +447,6 @@ def create_artist_form():
 def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
-  #form = ArtistForm()
   error=False
   try:
     artist = Artist(
