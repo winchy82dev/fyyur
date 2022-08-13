@@ -3,6 +3,7 @@
 #----------------------------------------------------------------------------#
 
 import json
+import sys
 import dateutil.parser
 import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
@@ -60,7 +61,8 @@ class Artist(db.Model):
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
+    #genres = db.Column(db.String(120))
+    genres = db.Column(db.ARRAY(db.String()))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
     
@@ -70,7 +72,7 @@ class Artist(db.Model):
     shows = db.relationship('Show', backref='artist', lazy=True) #Show.artist
 
     def __repr__(self):
-        return f'<Artist {self.id} {self.name}>'
+        return f'<Artist {self.name}>'
 
     #  implement any missing fields, as a database migration using Flask-Migrate
 
@@ -443,13 +445,58 @@ def create_artist_form():
 def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
+  form = ArtistForm()
 
-  # on successful db insert, flash success
-  flash('Artist ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
-  return render_template('pages/home.html')
+  error=False
+  try:
+    # get_data = {
+    #   'name' : request.form.get('name'),
+    #   'city' : request.form.get('city'),
+    #   'state' : request.form.get('state'),
+    #   'phone' : request.form.get('phone'),
+    #   'image_link' : request.form.get('image_link'),
+    #   'genres' : request.form.getlist('genres'),
+    #   'facebook_link' : request.form.get('facebook_link'),
+    #   'website_link' : request.form.get('website_link'),
+    #   'seeking_venue' : False if request.form.get('seeking_venue') == None else True,
+    #   'seeking_description' : request.form.get('seeking_description'),
+    #   }
+
+    # print(get_data)
+    artist = Artist(
+      name = request.form.get('name'),
+      city = request.form.get('city'),
+      state = request.form.get('state'),
+      phone = request.form.get('phone'),
+      image_link = request.form.get('image_link'),
+      genres = request.form.getlist('genres'),
+      facebook_link = request.form.get('facebook_link'),
+      website = request.form.get('website_link'),
+      seeking_venue = False if request.form.get('seeking_venue') == None else True,
+      seeking_description = request.form.get('seeking_description')
+    )
+      # name = get_data['name'],
+  
+    print(artist)
+    
+    db.session.add(artist)
+    db.session.commit()
+
+    # on successful db insert, flash success
+    flashType = 'success'
+    flash('Artist ' + request.form['name'] + ' was successfully listed!')
+  except:
+    error=True
+    db.session.rollback()
+    print(sys.exc_info())
+    # TODO: on unsuccessful db insert, flash an error instead.
+    flashType = 'danger'
+    flash('An error occurred. Artist ' + request.form['name']  + ' could not be listed.')
+  finally:
+    db.session.close()
+  #if not error:
+  # TODO: modify data to be the data object returned from db insertion
+  return render_template('pages/home.html', flashType = flashType)
 
 
 #  Shows
