@@ -554,7 +554,6 @@ def edit_artist(artist_id):
   artist = Artist.query.get(artist_id)
   print(artist)
 
-  
   form.name.data = artist.name
   form.genres.data = artist.genres
   form.city.data = artist.city
@@ -583,15 +582,53 @@ def edit_artist(artist_id):
     "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
     "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
   }
-  # TODO: populate form with fields from artist with ID <artist_id>
+  # populate form with fields from artist with ID <artist_id>
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
-  # TODO: take values from the form submitted, and update existing
+  # take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
+  # //////////////////////////////////
+  error=False
+  artist = Artist.query.get(artist_id)
+  print(artist)
+  try:
+  # modify data to be the data object returned from db insertion
+    # artist = Artist(
+    artist.name = request.form.get('name')
+    artist.city = request.form.get('city')
+    artist.state = request.form.get('state')
+    artist.phone = request.form.get('phone')
+    artist.image_link = request.form.get('image_link')
+    artist.genres = request.form.getlist('genres')
+    artist.facebook_link = request.form.get('facebook_link')
+    artist.website = request.form.get('website_link')
+    artist.seeking_venue = False if request.form.get('seeking_venue') == None else True
+    artist.seeking_description = request.form.get('seeking_description')
+    # )
+  
+    # prints each element of the instance created
+    for attr, value in artist.__dict__.items():
+        print(attr + ' : ', value)
 
-  return redirect(url_for('show_artist', artist_id=artist_id))
+    db.session.commit()   
+  except:
+    error=True
+    db.session.rollback()
+    print(sys.exc_info())
+    # on unsuccessful db insert, flash an error instead.
+    flash('An error occurred. Artist ' + request.form['name']  + ' could not be Updated.')
+  finally:
+    db.session.close()
+  if not error:
+    # on successful db insert, flash success
+    flash('Artist ' + request.form['name'] + ' was successfully Updated!')
+    return redirect(url_for('show_artist', artist_id=artist_id))
+  else:
+    # on unsuccessful db insert, flash an error instead.
+    flash('An error occurred. Artist ' + request.form['name']  + ' could not be Updated.')
+    return redirect(url_for('show_artist', artist_id=artist_id))
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
