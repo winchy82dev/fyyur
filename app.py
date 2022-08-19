@@ -535,9 +535,27 @@ def create_artist_submission():
 @app.route('/shows')
 def shows():
   # displays list of shows at /shows
-  # TODO: replace with real venues data.
+  # replace with real venues data.
 
-  data=[{
+  shows = Show.query.all()
+
+  data = []
+  for show in shows:
+    data.append({      
+        "venue_id": show.venue_id,
+        "venue_name": show.venue.name,
+        "artist_id": show.artist_id,
+        "artist_name": show.artist.name,
+        "artist_image_link": show.artist.image_link,
+        "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')
+    })
+
+
+  # prints each element of the show 
+  for elem in data:
+    print(elem)
+
+  mock_data=[{
     "venue_id": 1,
     "venue_name": "The Musical Hop",
     "artist_id": 4,
