@@ -351,7 +351,62 @@ def search_artists():
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
   # shows the artist page with the given artist_id
-  # TODO: replace with real artist data from the artist table, using artist_id
+  # replace with real artist data from the artist table, using artist_id
+  
+  artists = db.session.query(Artist).get(artist_id)
+  # print(artists)
+  all_past_shows = db.session.query(Show).join(Venue).filter(
+    Show.artist_id == artist_id ).filter(
+      Show.start_time < datetime.now()
+    ).all()
+  print('past_shows', all_past_shows)
+  past_shows = []
+  
+  for show in all_past_shows:
+    past_shows.append({
+      "venue_id": show.venue_id,
+      "venue_name": show.venue.name,
+      "venue_image_link": show.venue.image_link,
+      "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')
+  })
+
+  all_upcoming_shows = db.session.query(Show).join(Venue).filter(
+    Show.artist_id == artist_id ).filter(
+      Show.start_time > datetime.now()
+    ).all()
+  print('upcoming_shows', all_upcoming_shows)
+  upcoming_shows = []
+
+  for show in all_upcoming_shows:
+    upcoming_shows.append({
+      "venue_id": show.venue_id,
+      "venue_name": show.venue.name,
+      "venue_image_link": show.venue.image_link,
+      "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')
+      # "2035-04-01T20:00:00.000Z"
+    })
+
+  data = {
+    "id": artists.id,
+    "name": artists.name,
+    "genres": artists.genres,
+    "city": artists.city,
+    "state": artists.state,
+    "phone": artists.phone,
+    "website": artists.website,
+    "facebook_link": artists.facebook_link,
+    "seeking_venue": artists.seeking_venue,
+    "seeking_description": artists.seeking_description,
+    "image_link": artists.image_link,
+    "past_shows": past_shows,
+    "upcoming_shows": upcoming_shows,
+    "past_shows_count": len(past_shows),
+    "upcoming_shows_count": len(upcoming_shows),
+  }
+  # prints each element of the instance created
+  for attr, value in data.items():
+    print(attr + ' : ', value)
+
   data1={
     "id": 4,
     "name": "Guns N Petals",
@@ -370,9 +425,19 @@ def show_artist(artist_id):
       "venue_image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
       "start_time": "2019-05-21T21:30:00.000Z"
     }],
-    "upcoming_shows": [],
+    "upcoming_shows": [{
+      "venue_id": 3,
+      "venue_name": "Park Square Live Music & Coffee",
+      "venue_image_link": "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",
+      "start_time": "2035-04-01T20:00:00.000Z"
+    }, {
+      "venue_id": 3,
+      "venue_name": "Park Square Live Music & Coffee",
+      "venue_image_link": "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",
+      "start_time": "2035-04-08T20:00:00.000Z"
+    }],
     "past_shows_count": 1,
-    "upcoming_shows_count": 0,
+    "upcoming_shows_count": 1,
   }
   data2={
     "id": 5,
@@ -423,7 +488,7 @@ def show_artist(artist_id):
     "past_shows_count": 0,
     "upcoming_shows_count": 3,
   }
-  data = list(filter(lambda d: d['id'] == artist_id, [data1, data2, data3]))[0]
+  # data = list(filter(lambda d: d['id'] == artist_id, [data1, data2, data3]))[0]
   return render_template('pages/show_artist.html', artist=data)
 
 #  Update
