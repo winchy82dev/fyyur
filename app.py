@@ -671,9 +671,48 @@ def edit_venue(venue_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
-  # TODO: take values from the form submitted, and update existing
+  # take values from the form submitted, and update existing
   # venue record with ID <venue_id> using the new attributes
-  return redirect(url_for('show_venue', venue_id=venue_id))
+  venue = Venue.query.get(venue_id)
+  print(venue)
+  error=False
+  try:
+  # modify data to be the data object returned from db insertion
+    # venue = Venue(
+    venue.name = request.form.get('name')
+    venue.city = request.form.get('city')
+    venue.state = request.form.get('state')
+    venue.address = request.form.get('address')
+    venue.phone = request.form.get('phone')
+    venue.image_link = request.form.get('image_link')
+    venue.genres = request.form.getlist('genres')
+    venue.facebook_link = request.form.get('facebook_link')
+    venue.website = request.form.get('website_link')
+    venue.seeking_talent = False if request.form.get('seeking_talent') == None else True
+    venue.seeking_description = request.form.get('seeking_description')
+    # )
+    # prints each element of the instance created
+    for attr, value in venue.__dict__.items():
+        print(attr + ' : ', value)
+    # insert form data as a new Venue record in the db, instead
+
+    db.session.commit()   
+    # on successful db insert, flash success
+    flash('Venue ' + request.form['name'] + ' was successfully listed!')
+  except:
+    error=True
+    db.session.rollback()
+    print(sys.exc_info())
+    # on unsuccessful db insert, flash an error instead.
+    flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+  finally:
+    db.session.close()
+  if not error:
+    return redirect(url_for('show_venue', venue_id=venue_id))
+  else:
+    # on unsuccessful db insert, flash an error instead.
+    flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+    return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Create Artist
 #  ----------------------------------------------------------------
