@@ -551,7 +551,26 @@ def show_artist(artist_id):
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
   form = ArtistForm()
-  artist={
+  artist = Artist.query.get(artist_id)
+  print(artist)
+
+  
+  form.name.data = artist.name
+  form.genres.data = artist.genres
+  form.city.data = artist.city
+  form.state.data = artist.state
+  form.phone.data = artist.phone
+  form.website_link.data = artist.website
+  form.facebook_link.data = artist.facebook_link
+  form.seeking_venue.data = artist.seeking_venue
+  form.seeking_description.data = artist.seeking_description
+  form.image_link.data = artist.image_link
+
+  # prints each element of the instance created
+  for attr, value in artist.__dict__.items():
+    print(attr + ' : ', value)
+
+  mock_artist={
     "id": 4,
     "name": "Guns N Petals",
     "genres": ["Rock n Roll"],
