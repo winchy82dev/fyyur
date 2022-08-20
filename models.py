@@ -1,6 +1,3 @@
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_moment import Moment
 from app import db
 
 class Venue(db.Model):
