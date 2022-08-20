@@ -116,7 +116,6 @@ def search_venues():
 
   else:
     response={"count": 0}
-    return render_template('pages/search_venues.html',results=response, search_term=request.form.get('search_term', ''))
   return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/venues/<int:venue_id>')
@@ -354,7 +353,6 @@ def search_artists():
     
   else:
     response={"count": 0}
-    return render_template('pages/search_venues.html',results=response, search_term=request.form.get('search_term', ''))
   return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/artists/<int:artist_id>')
