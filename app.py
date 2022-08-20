@@ -8,7 +8,7 @@ import sys
 from timeit import repeat
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for
+from flask import Flask, render_template, request, Response, flash, redirect, url_for, jsonify
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 import logging
@@ -247,10 +247,44 @@ def create_venue_submission():
 def delete_venue(venue_id):
   # TODO: Complete this endpoint for taking a venue_id, and using
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
+  error = False
+  try:
+    shows = db.session.query(Show).join(Venue).filter(
+    Show.venue_id == venue_id ).all()
+    print('venue', venue_id)
 
-  # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-  # clicking that button delete it from the db then redirect the user to the homepage
-  return None
+    # first delete all entries on show table where venue_id = venue_id
+    # select * from show where venue_id = venue_id;
+    for show in shows:
+      print(show)
+      db.session.delete(show)
+    # then delete the venue_id entry in the venue table
+    # select * from venue where id = venue_id;
+    Venue.query.filter_by(id=venue_id).delete()
+    db.session.commit()
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+    # on unsuccessful db insert, flash an error instead.
+    flash('An error occurred. Venue could not be deleted.')
+    return jsonify({'success':False})
+  finally:
+    db.session.close()
+  if not error:
+    # on successful db insert, flash success
+    flash('Venue was successfully deleted!')
+    # fetch method implemented on tempates/layout/show_venue.html
+    # return jsonify({'success':True})
+    return {redirect(url_for('index')), jsonify({'success':True})}
+  else:
+    # on unsuccessful db insert, flash an error instead.
+    flash('An error occurred. Venue could not be deleted.')
+    # return jsonify({'success':False})
+    return redirect(url_for('index'))
+    # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
+    # clicking that button delete it from the db then redirect the user to the homepage
+    # return None
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -508,39 +542,46 @@ def create_artist_form():
 def create_artist_submission():
   # called upon submitting the new artist listing form
   error=False
-  try:
-  # modify data to be the data object returned from db insertion
-    artist = Artist(
-      name = request.form.get('name'),
-      city = request.form.get('city'),
-      state = request.form.get('state'),
-      phone = request.form.get('phone'),
-      image_link = request.form.get('image_link'),
-      genres = request.form.getlist('genres'),
-      facebook_link = request.form.get('facebook_link'),
-      website = request.form.get('website_link'),
-      seeking_venue = False if request.form.get('seeking_venue') == None else True,
-      seeking_description = request.form.get('seeking_description')
-    )
-    # prints each element of the instance created
-    for attr, value in artist.__dict__.items():
-        print(attr + ' : ', value)
+  form = VenueForm()
+  if form.validate():
+    try:
+      # modify data to be the data object returned from db insertion
+      artist = Artist(
+        name = request.form.get('name'),
+        city = request.form.get('city'),
+        state = request.form.get('state'),
+        phone = request.form.get('phone'),
+        image_link = request.form.get('image_link'),
+        genres = request.form.getlist('genres'),
+        facebook_link = request.form.get('facebook_link'),
+        website = request.form.get('website_link'),
+        seeking_venue = False if request.form.get('seeking_venue') == None else True,
+        seeking_description = request.form.get('seeking_description')
+      )
+      # prints each element of the instance created
+      for attr, value in artist.__dict__.items():
+          print(attr + ' : ', value)
+      # insert form data as a new Venue record in the db, instead
+      db.session.add(artist)
+      db.session.commit()   
+      # on successful db insert, flash success
+      flash('Artist ' + request.form['name'] + ' was successfully listed!')
+    except:
+      error=True
+      db.session.rollback()
+      print(sys.exc_info())
+      # on unsuccessful db insert, flash an error instead.
+      flash('An error occurred. Artist ' + request.form['name']  + ' could not be listed.')
+    finally:
+      db.session.close()
+    if not error:
+      return render_template('pages/home.html')
+  else:
+    print('validation', form.validate())
+    for field, message in form.errors.items():
+        flash(field + ' - ' + str(message), 'danger')
+  return render_template('forms/new_venue.html', form=form)
 
-  # insert form data as a new Venue record in the db, instead
-    db.session.add(artist)
-    db.session.commit()   
-    # on successful db insert, flash success
-    flash('Artist ' + request.form['name'] + ' was successfully listed!')
-  except:
-    error=True
-    db.session.rollback()
-    print(sys.exc_info())
-    # on unsuccessful db insert, flash an error instead.
-    flash('An error occurred. Artist ' + request.form['name']  + ' could not be listed.')
-  finally:
-    db.session.close()
-  if not error:
-    return render_template('pages/home.html')
 
 
 

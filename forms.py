@@ -198,8 +198,8 @@ class ArtistForm(Form):
         ]
     )
     phone = StringField(
-        # implement validation logic for phone 
-        'phone', validators=[DataRequired(),
+        'phone', validators=[
+            DataRequired(),
             Regexp(
                 regex=r'^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$',
                 message="Valid phone number format is xxx-xxx-xxxx"
