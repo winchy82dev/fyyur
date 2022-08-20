@@ -13,9 +13,11 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging import Formatter, FileHandler
-from flask_wtf import Form
 from forms import *
+from flask_wtf import FlaskForm, Form
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect
+
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -25,6 +27,9 @@ moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+csrf = CSRFProtect(app)
+csrf.init_app(app)
+
 
 # connect to a local postgresql database
 
@@ -65,7 +70,7 @@ def venues():
   # replace with real venues data.
   #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
   current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-  print(current_time)
+  # print(current_time)
   # upcoming_shows = Venue.shows.filter(Show.start_time > current_time).all()
   # print(upcoming_shows)
   venues = Venue.query.order_by(Venue.city, Venue.state).all()
@@ -191,9 +196,13 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   error=False
-  try:
-  # modify data to be the data object returned from db insertion
-    venue = Venue(
+  form = VenueForm()
+  if form.validate():
+    print('validation', form.validate())
+  
+    try:
+      # modify data to be the data object returned from db insertion
+      venue = Venue(
       name = request.form.get('name'),
       city = request.form.get('city'),
       state = request.form.get('state'),
@@ -205,26 +214,34 @@ def create_venue_submission():
       website = request.form.get('website_link'),
       seeking_talent = False if request.form.get('seeking_talent') == None else True,
       seeking_description = request.form.get('seeking_description')
-    )
-    # prints each element of the instance created
-    for attr, value in venue.__dict__.items():
+      )
+      # prints each element of the instance created
+      for attr, value in venue.__dict__.items():
         print(attr + ' : ', value)
-    # insert form data as a new Venue record in the db, instead
-    db.session.add(venue)
-    db.session.commit()   
-    # on successful db insert, flash success
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-    flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  except:
-    error=True
-    db.session.rollback()
-    print(sys.exc_info())
-    # on unsuccessful db insert, flash an error instead.
-    flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
-  finally:
-    db.session.close()
-  if not error:
-    return render_template('pages/home.html')
+      # insert form data as a new Venue record in the db, instead
+      db.session.add(venue)
+      db.session.commit()   
+      # on successful db insert, flash success
+      # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+      flash('Venue ' + request.form['name'] + ' was successfully listed!')
+    except:
+      error=True
+      db.session.rollback()
+      print(sys.exc_info())
+      # on unsuccessful db insert, flash an error instead.
+      flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+    finally:
+      db.session.close()
+    if not error:
+      # on successful db insert, flash success
+      flash('Venue ' + request.form['name'] + ' was successfully listed!')
+      return render_template('pages/home.html')
+  else:
+    print('validation', form.validate())
+    for field, message in form.errors.items():
+        flash(field + ' - ' + str(message), 'danger')
+  return render_template('forms/new_venue.html', form=form)
+
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
